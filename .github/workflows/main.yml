@@ -11,9 +11,6 @@ jobs:
       with:
         submodules: 'recursive'
 
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
-
     - name: Setup Ninja
       uses: ashutoshvarma/setup-ninja@master
 
@@ -22,15 +19,17 @@ jobs:
         curl -L -o skia.zip https://github.com
         7z x skia.zip -oskia
 
-    - name: Build
+    - name: Build Aseprite
       run: |
         mkdir build
         cd build
         cmake -DCMAKE_BUILD_TYPE=Release -DLAF_BACKEND=skia -DSKIA_DIR=../skia -DSKIA_LIBRARY_DIR=../skia/out/Release-x64 -G Ninja ..
         ninja aseprite
 
-    - name: Upload
+    - name: Upload Artifact
       uses: actions/upload-artifact@v4
       with:
         name: Aseprite-Windows-Free
-        path: build/bin/
+        path: |
+          build/bin/aseprite.exe
+          build/bin/data/
