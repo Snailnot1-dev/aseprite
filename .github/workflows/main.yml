@@ -1,0 +1,40 @@
+name: Build Aseprite
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2022
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: 'recursive'
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Setup CMake
+      uses: jwlawrence/actions-setup-cmake@v1
+
+    - name: Download Skia
+      run: |
+        curl -L -o skia.zip https://github.com
+        7z x skia.zip -oskia
+
+    - name: Configure CMake
+      run: |
+        mkdir build
+        cd build
+        cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLAF_BACKEND=skia -DSKIA_DIR=../skia -DSKIA_LIBRARY_DIR=../skia/out/Release-x64 -G "Visual Studio 17 2022" -A x64 ..
+
+    - name: Build Aseprite
+      run: |
+        cd build
+        msbuild aseprite.sln /p:Configuration=RelWithDebInfo /p:Platform=x64
+
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Aseprite-Windows
+        path: build/bin/
